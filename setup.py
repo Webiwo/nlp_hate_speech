@@ -1,9 +1,8 @@
 from setuptools import setup, find_packages
 
 
-REPO_NAME = "Kidney-Disease-Classification"
+REPO_NAME = "nlp_hate_speech"
 AUTHOR_USER_NAME = "Webiwo"
-SRC_REPO = "nlp_hate_speech"
 AUTHOR_EMAIL = "webiwo360@gmail.com"
 
 setup(
