@@ -1,0 +1,30 @@
+data_ingestion:
+  bucket_name: "hate-speech-detection"
+  artifacts_dir: "DataIngestionArtifacts"
+  zip_file_name: "dataset.zip"
+  imbalanced_file: "imbalanced_data.csv"
+  raw_file: "raw_data.csv"
+
+data_transformation:
+  artifacts_dir: "DataTransformationArtifacts"
+  transformed_file_name: "final.csv"
+  drop_columns: ["Unnamed: 0", "count", "hate_speech", "offensive_language", "neither"]
+  class_column: "class"
+  label_column: "label"
+  tweet_column: "tweet"
+
+model_trainer:
+  artifacts_dir: "ModelTrainerArtifacts"
+  trained_model_name: "model.keras"
+  x_test_file: "x_test.csv"
+  y_test_file: "y_test.csv"
+  x_train_file: "x_train.csv"
+  random_state: 42
+  epochs: 3
+  batch_size: 128
+  validation_split: 0.2
+  max_words: 50000
+  max_len: 300
+  loss: "binary_crossentropy"
+  metrics: ["accuracy"]
+  activation: "sigmoid"

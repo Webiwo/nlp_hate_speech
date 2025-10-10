@@ -11,4 +11,5 @@ google-cloud-storage
 fastapi
 uvicorn
 Jinja2
+pyyaml
 -e .
