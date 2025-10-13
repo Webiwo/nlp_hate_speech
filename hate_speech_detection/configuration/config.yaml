@@ -12,6 +12,8 @@ data_transformation:
   class_column: "class"
   label_column: "label"
   tweet_column: "tweet"
+  language: "english"
+  more_stopwords: ["u", "im", "c"]
 
 model_trainer:
   artifacts_dir: "ModelTrainerArtifacts"

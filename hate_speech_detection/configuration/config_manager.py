@@ -4,7 +4,10 @@ import yaml
 from dataclasses import dataclass
 from hate_speech_detection.constants import CONFIG_FILE_PATH, MAIN_ARTIFACTS_DIR
 from hate_speech_detection.utils.common_utils import read_yaml, create_directories
-from hate_speech_detection.entity.config_entity import DataIngestionConfig
+from hate_speech_detection.entity.config_entity import (
+    DataIngestionConfig,
+    DataTransformationConfig,
+)
 from hate_speech_detection.exception.exception import (
     PipelineExecutionError,
     DataValidationError,
@@ -105,7 +108,19 @@ class ConfigurationManager:
         )
 
     def get_data_transformation_config(self):
-        return self.config.data_transformation
+        return DataTransformationConfig(
+            artifacts_dir=self.data_transformation_dir,
+            transformed_file_path=os.path.join(
+                self.data_transformation_dir,
+                self.config.data_transformation["transformed_file_name"],
+            ),
+            drop_columns=self.config.data_transformation["drop_columns"],
+            class_column=self.config.data_transformation["class_column"],
+            label_column=self.config.data_transformation["label_column"],
+            tweet_column=self.config.data_transformation["tweet_column"],
+            language=self.config.data_transformation["language"],
+            more_stopwords=self.config.data_transformation["more_stopwords"],
+        )
 
     def get_model_trainer_config(self):
         return self.config.model_trainer

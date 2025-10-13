@@ -61,6 +61,10 @@ class DataIngestionError(CustomException):
     """Error downloading or unpacking data"""
 
 
+class DataTransformationError(CustomException):
+    """Error transforming data"""
+
+
 class DataValidationError(CustomException):
     """Data structure validation error"""
 

@@ -13,11 +13,13 @@ class DataIngestionConfig:
 @dataclass
 class DataTransformationConfig:
     artifacts_dir: str
-    transformed_file_name: str
+    transformed_file_path: str
     drop_columns: list
     class_column: str
     label_column: str
     tweet_column: str
+    language: str
+    more_stopwords: list
 
 
 @dataclass
