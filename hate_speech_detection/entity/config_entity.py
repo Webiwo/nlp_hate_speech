@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+import token
+import tokenize
 
 
 @dataclass
@@ -25,14 +27,16 @@ class DataTransformationConfig:
 @dataclass
 class ModelTrainerConfig:
     artifacts_dir: str
-    trained_model_name: str
-    x_test_file: str
-    y_test_file: str
-    x_train_file: str
+    tokenizer_path: str
+    trained_model_path: str
+    x_train_path: str
+    y_train_path: str
+    x_test_path: str
+    y_test_path: str
     random_state: int
     epochs: int
     batch_size: int
-    validation_split: float
+    test_split: float
     max_words: int
     max_len: int
     loss: str

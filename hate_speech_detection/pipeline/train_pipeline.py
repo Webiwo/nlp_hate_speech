@@ -5,6 +5,7 @@ from hate_speech_detection.exception.exception import PipelineExecutionError
 
 from hate_speech_detection.components.data_ingestion import DataIngestion
 from hate_speech_detection.components.data_validator import DataValidator
+from hate_speech_detection.components.model_trainer import ModelTrainer
 
 
 class TrainPipeline:
@@ -12,6 +13,7 @@ class TrainPipeline:
         self.config_manager = ConfigurationManager()
         self.ingest_config = self.config_manager.get_data_ingestion_config()
         self.trans_config = self.config_manager.get_data_transformation_config()
+        self.train_config = self.config_manager.get_model_trainer_config()
 
     def _run_data_ingestion(self):
         try:
@@ -33,10 +35,19 @@ class TrainPipeline:
             logger.error(f"Unexpected pipeline error: {e}")
             raise PipelineExecutionError(e) from e
 
+    def _train_model(self):
+        try:
+            trainer = ModelTrainer(self.train_config, self.trans_config)
+            trainer.initiate_model_trainer()
+        except Exception as e:
+            logger.error(f"Unexpected training error: {e}")
+            raise PipelineExecutionError(e) from e
+
     def run_pipeline(self):
         try:
             logger.info("Starting training pipeline...")
             self._run_data_ingestion()
+            self._train_model()
             logger.info("Training pipeline completed successfully.")
 
         except Exception as e:

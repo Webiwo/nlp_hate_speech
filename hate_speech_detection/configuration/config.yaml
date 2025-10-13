@@ -17,14 +17,16 @@ data_transformation:
 
 model_trainer:
   artifacts_dir: "ModelTrainerArtifacts"
+  tokenizer_name: "tokenizer.pickle"
   trained_model_name: "model.keras"
+  x_train_file: "x_train.csv"
+  y_train_file: "y_train.csv"
   x_test_file: "x_test.csv"
   y_test_file: "y_test.csv"
-  x_train_file: "x_train.csv"
   random_state: 42
-  epochs: 3
+  epochs: 10
   batch_size: 128
-  validation_split: 0.2
+  test_split: 0.2
   max_words: 50000
   max_len: 300
   loss: "binary_crossentropy"
