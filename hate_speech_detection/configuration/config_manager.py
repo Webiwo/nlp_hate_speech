@@ -1,6 +1,8 @@
 from calendar import c
 import os
+from pyexpat import model
 from re import T
+from turtle import mode
 import yaml
 from dataclasses import dataclass
 from hate_speech_detection.constants import CONFIG_FILE_PATH, MAIN_ARTIFACTS_DIR
@@ -9,6 +11,7 @@ from hate_speech_detection.entity.config_entity import (
     DataIngestionConfig,
     DataTransformationConfig,
     ModelTrainerConfig,
+    ModelEvaluationConfig,
 )
 from hate_speech_detection.exception.exception import (
     PipelineExecutionError,
@@ -22,6 +25,7 @@ class Configuration:
     data_ingestion: dict
     data_transformation: dict
     model_trainer: dict
+    model_evaluation: dict
 
 
 class ConfigurationManager:
@@ -34,6 +38,9 @@ class ConfigurationManager:
             self.data_ingestion_dir = ""
             self.data_transformation_dir = ""
             self.model_trainer_dir = ""
+            self.trained_model_dir = ""
+            self.model_evaluation_dir = ""
+            self.best_model_dir = ""
             self.config = None
             self._load_config()
             self._create_directories()
@@ -52,6 +59,7 @@ class ConfigurationManager:
                 data_ingestion=config_dict.get("data_ingestion", {}),
                 data_transformation=config_dict.get("data_transformation", {}),
                 model_trainer=config_dict.get("model_trainer", {}),
+                model_evaluation=config_dict.get("model_evaluation", {}),
             )
 
             logger.info(
@@ -75,6 +83,16 @@ class ConfigurationManager:
         self.model_trainer_dir = os.path.join(
             self.main_artifacts_dir, self.config.model_trainer["artifacts_dir"]
         )
+        self.trained_model_dir = os.path.join(
+            self.model_trainer_dir,
+            self.config.model_trainer["model_dir"],
+        )
+        self.model_evaluation_dir = os.path.join(
+            self.main_artifacts_dir, self.config.model_evaluation["artifacts_dir"]
+        )
+        self.best_model_dir = os.path.join(
+            self.model_evaluation_dir, self.config.model_evaluation["best_model_dir"]
+        )
 
         try:
             dirs_to_create = [
@@ -82,8 +100,10 @@ class ConfigurationManager:
                 self.data_ingestion_dir,
                 self.data_transformation_dir,
                 self.model_trainer_dir,
+                self.trained_model_dir,
+                self.model_evaluation_dir,
+                self.best_model_dir,
             ]
-
             create_directories(dirs_to_create)
 
         except Exception as e:
@@ -130,8 +150,11 @@ class ConfigurationManager:
             tokenizer_path=os.path.join(
                 self.model_trainer_dir, self.config.model_trainer["tokenizer_name"]
             ),
+            trained_model_dir=self.trained_model_dir,
             trained_model_path=os.path.join(
-                self.model_trainer_dir, self.config.model_trainer["trained_model_name"]
+                self.model_trainer_dir,
+                self.config.model_trainer["model_dir"],
+                self.config.model_trainer["trained_model_name"],
             ),
             x_train_path=os.path.join(
                 self.model_trainer_dir, self.config.model_trainer["x_train_file"]
@@ -154,4 +177,14 @@ class ConfigurationManager:
             loss=self.config.model_trainer["loss"],
             metrics=self.config.model_trainer["metrics"],
             activation=self.config.model_trainer["activation"],
+        )
+
+    def get_model_evaluation_config(self):
+        return ModelEvaluationConfig(
+            artifacts_dir=self.model_evaluation_dir,
+            bucket_best_dir=f'{self.config.data_ingestion["bucket_name"]}/{self.config.model_evaluation["best_model_dir"]}',
+            best_model_dir=self.best_model_dir,
+            best_model_path=os.path.join(
+                self.best_model_dir, self.config.model_trainer["trained_model_name"]
+            ),
         )

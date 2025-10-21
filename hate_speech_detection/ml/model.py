@@ -27,7 +27,8 @@ class ModelArchitecture:
         model.compile(
             loss=self.config.loss, optimizer=RMSprop(), metrics=self.config.metrics
         )
+
         logger.info("Model architecture created successfully.")
-        logger.info(model.summary())
+        model.summary(print_fn=lambda x: logger.info(x))
 
         return model

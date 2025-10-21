@@ -1,15 +1,9 @@
-from logging import config
-from math import exp
-import os
-from pyexpat import model
-import sys
 import pickle
-from turtle import mode
+import io
+from sre_parse import Tokenizer
 import pandas as pd
-import proto
-import tensorflow as tf
 from sklearn.model_selection import train_test_split
-from keras.layers import TextVectorization
+from hate_speech_detection.components.data_tokenizer import DataTokenizer
 from hate_speech_detection.logger.logger import logger
 from hate_speech_detection.exception.exception import ModelTrainingError
 from hate_speech_detection.entity.config_entity import (
@@ -46,25 +40,7 @@ class ModelTrainer:
         )
         return X_train, X_test, y_train, y_test
 
-    def _topkenize(self, X_train, X_test):
-        logger.info("Tokenizing text data...")
-        vectorize_layer = TextVectorization(
-            max_tokens=self.train_config.max_words,
-            output_mode="int",
-            output_sequence_length=self.train_config.max_len,
-            ngrams=(1, 4),
-        )
-        ds = tf.data.Dataset.from_tensor_slices(X_train).batch(
-            self.train_config.batch_size
-        )
-        vectorize_layer.adapt(ds)
-        X_train_vectorized = vectorize_layer(X_train)
-        X_test_vectorized = vectorize_layer(X_test)
-
-        logger.info("Text data tokenization completed.")
-        return X_train_vectorized, X_test_vectorized, vectorize_layer
-
-    def initiate_model_trainer(self, pickle=False):
+    def initiate_model_trainer(self):
         try:
             logger.info("Model training started...")
             X_train, X_test, y_train, y_test = self._split_data()
@@ -76,12 +52,13 @@ class ModelTrainer:
             X_test.to_csv(self.train_config.x_test_path, index=False)
             y_test.to_csv(self.train_config.y_test_path, index=False)
 
-            X_train, X_test, vectorizer = self._topkenize(X_train, X_test)
+            tokenizer = DataTokenizer(self.train_config)
+            X_train, vectorizer = tokenizer.tokenize(X_train)
 
             model_architecture = ModelArchitecture(self.train_config)
             model = model_architecture.get_model()
 
-            history = model.fit(
+            model.fit(
                 X_train,
                 y_train,
                 batch_size=self.train_config.batch_size,
@@ -91,16 +68,9 @@ class ModelTrainer:
 
             model.save(self.train_config.trained_model_path)
 
-            if pickle:
-                with open(self.train_config.tokenizer_path, "wb") as f:
-                    pickle.dump(vectorizer, f, protocol=pickle.HIGHEST_PROTOCOL)
-            else:
-                vectorizer_model = tf.keras.models.Sequential([vectorizer])
-                vectorizer_model.save(
-                    self.train_config.tokenizer_path.replace(".pickle", ".keras")
-                )
+            with io.open(self.train_config.tokenizer_path, "wb") as f:
+                pickle.dump(vectorizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             logger.info("Model training finished...")
-            logger.info(history)
         except Exception as e:
             raise ModelTrainingError(e) from e

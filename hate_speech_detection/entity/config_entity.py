@@ -28,6 +28,7 @@ class DataTransformationConfig:
 class ModelTrainerConfig:
     artifacts_dir: str
     tokenizer_path: str
+    trained_model_dir: str
     trained_model_path: str
     x_train_path: str
     y_train_path: str
@@ -42,3 +43,18 @@ class ModelTrainerConfig:
     loss: str
     metrics: list
     activation: str
+
+
+@dataclass
+class ModelEvaluationConfig:
+    artifacts_dir: str
+    bucket_best_dir: str
+    best_model_dir: str
+    best_model_path: str
+
+
+@dataclass
+class ModelPusherConfig:
+    artifacts_dir: str
+    app_host: str
+    app_port: int

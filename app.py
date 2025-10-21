@@ -1,10 +1,13 @@
 import sys
+import os
 from hate_speech_detection.pipeline.train_pipeline import TrainPipeline
 from hate_speech_detection.logger.logger import logger
 from hate_speech_detection.exception.exception import PipelineExecutionError
 
 
 if __name__ == "__main__":
+    os.environ["PYTHONUTF8"] = "1"
+
     try:
         pipeline = TrainPipeline()
         pipeline.run_pipeline()

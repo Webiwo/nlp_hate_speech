@@ -1,5 +1,3 @@
-import os
-import sys
 from zipfile import ZipFile, BadZipFile
 from hate_speech_detection.exception.exception import (
     DataIngestionError,

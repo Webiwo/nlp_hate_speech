@@ -73,5 +73,9 @@ class ModelTrainingError(CustomException):
     """Error while training the model"""
 
 
+class ModelEvaluationError(CustomException):
+    """Error while evaluating the model"""
+
+
 class PipelineExecutionError(CustomException):
     """General error in the pipeline run"""
