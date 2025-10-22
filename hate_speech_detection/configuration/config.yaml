@@ -1,5 +1,6 @@
 data_ingestion:
   bucket_name: "hate-speech-detection"
+  bucket_data_dir: "Dataset"
   artifacts_dir: "DataIngestionArtifacts"
   zip_file_name: "dataset.zip"
   imbalanced_file: "imbalanced_data.csv"
@@ -25,7 +26,7 @@ model_trainer:
   x_test_file: "x_test.csv"
   y_test_file: "y_test.csv"
   random_state: 42
-  epochs: 2
+  epochs: 1
   batch_size: 128
   test_split: 0.2
   max_words: 50000
@@ -38,7 +39,11 @@ model_evaluation:
   artifacts_dir: "ModelEvaluationArtifacts"
   best_model_dir: "BestModel"
 
-model_pusher:
-  artifacts_dir: "ModelPusherArtifacts"  
+prediction:
+  artifacts_dir: "PredicionArtifacts"
+  tokenizer_name: "tokenizer.pickle"
+  model_name: "model.keras"  
+
+web:
   app_host: "0.0.0.0"
   app_port: 8080

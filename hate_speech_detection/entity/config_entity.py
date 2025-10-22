@@ -6,6 +6,7 @@ import tokenize
 @dataclass
 class DataIngestionConfig:
     bucket_name: str
+    bucket_data_dir: str
     zip_file_name: str
     artifacts_dir: str
     imbalanced_data_path: str
@@ -54,7 +55,15 @@ class ModelEvaluationConfig:
 
 
 @dataclass
-class ModelPusherConfig:
+class PredictionConfig:
     artifacts_dir: str
+    tokenizer_name: str
+    tokenizer_path: str
+    model_name: str
+    model_path: str
+
+
+@dataclass
+class WebConfig:
     app_host: str
     app_port: int

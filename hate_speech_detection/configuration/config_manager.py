@@ -1,8 +1,4 @@
-from calendar import c
 import os
-from pyexpat import model
-from re import T
-from turtle import mode
 import yaml
 from dataclasses import dataclass
 from hate_speech_detection.constants import CONFIG_FILE_PATH, MAIN_ARTIFACTS_DIR
@@ -12,6 +8,8 @@ from hate_speech_detection.entity.config_entity import (
     DataTransformationConfig,
     ModelTrainerConfig,
     ModelEvaluationConfig,
+    PredictionConfig,
+    WebConfig,
 )
 from hate_speech_detection.exception.exception import (
     PipelineExecutionError,
@@ -26,6 +24,8 @@ class Configuration:
     data_transformation: dict
     model_trainer: dict
     model_evaluation: dict
+    prediction: dict
+    web: dict
 
 
 class ConfigurationManager:
@@ -41,6 +41,7 @@ class ConfigurationManager:
             self.trained_model_dir = ""
             self.model_evaluation_dir = ""
             self.best_model_dir = ""
+            self.prediction_dir = ""
             self.config = None
             self._load_config()
             self._create_directories()
@@ -60,6 +61,8 @@ class ConfigurationManager:
                 data_transformation=config_dict.get("data_transformation", {}),
                 model_trainer=config_dict.get("model_trainer", {}),
                 model_evaluation=config_dict.get("model_evaluation", {}),
+                prediction=config_dict.get("prediction", {}),
+                web=config_dict.get("web", {}),
             )
 
             logger.info(
@@ -93,6 +96,9 @@ class ConfigurationManager:
         self.best_model_dir = os.path.join(
             self.model_evaluation_dir, self.config.model_evaluation["best_model_dir"]
         )
+        self.prediction_dir = os.path.join(
+            self.main_artifacts_dir, self.config.prediction["artifacts_dir"]
+        )
 
         try:
             dirs_to_create = [
@@ -103,6 +109,7 @@ class ConfigurationManager:
                 self.trained_model_dir,
                 self.model_evaluation_dir,
                 self.best_model_dir,
+                self.prediction_dir,
             ]
             create_directories(dirs_to_create)
 
@@ -117,6 +124,7 @@ class ConfigurationManager:
     def get_data_ingestion_config(self) -> DataIngestionConfig:
         return DataIngestionConfig(
             bucket_name=self.config.data_ingestion["bucket_name"],
+            bucket_data_dir=f'{self.config.data_ingestion["bucket_name"]}/{self.config.data_ingestion["bucket_data_dir"]}',
             artifacts_dir=self.data_ingestion_dir,
             zip_file_name=os.path.join(
                 self.data_ingestion_dir, self.config.data_ingestion["zip_file_name"]
@@ -187,4 +195,22 @@ class ConfigurationManager:
             best_model_path=os.path.join(
                 self.best_model_dir, self.config.model_trainer["trained_model_name"]
             ),
+        )
+
+    def get_prediction_config(self):
+        return PredictionConfig(
+            artifacts_dir=self.prediction_dir,
+            tokenizer_name=self.config.prediction["tokenizer_name"],
+            model_name=self.config.prediction["model_name"],
+            tokenizer_path=os.path.join(
+                self.prediction_dir, self.config.prediction["tokenizer_name"]
+            ),
+            model_path=os.path.join(
+                self.prediction_dir, self.config.prediction["model_name"]
+            ),
+        )
+
+    def get_web_config(self):
+        return WebConfig(
+            app_host=self.config.web["app_host"], app_port=self.config.web["app_port"]
         )

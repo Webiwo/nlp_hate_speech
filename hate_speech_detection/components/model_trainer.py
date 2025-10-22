@@ -26,8 +26,11 @@ class ModelTrainer:
     def _split_data(self):
         logger.info("Splitting data into train and test sets...")
         df = pd.read_csv(self.trans_config.transformed_file_path)
+        df = df.dropna()
         X = df[self.trans_config.tweet_column]
         y = df[self.trans_config.label_column]
+
+        logger.info(f"Data cardinality (X,y) : ({len(X)}, {len(y)})")
 
         X_train, X_test, y_train, y_test = train_test_split(
             X,
@@ -44,13 +47,15 @@ class ModelTrainer:
         try:
             logger.info("Model training started...")
             X_train, X_test, y_train, y_test = self._split_data()
-            X_train = X_train.dropna()
-            X_test = X_test.dropna()
 
-            X_train.to_csv(self.train_config.x_train_path, index=False)
-            y_train.to_csv(self.train_config.y_train_path, index=False)
-            X_test.to_csv(self.train_config.x_test_path, index=False)
-            y_test.to_csv(self.train_config.y_test_path, index=False)
+            X_train.to_csv(
+                self.train_config.x_train_path, index=False, encoding="utf-8"
+            )
+            y_train.to_csv(
+                self.train_config.y_train_path, index=False, encoding="utf-8"
+            )
+            X_test.to_csv(self.train_config.x_test_path, index=False, encoding="utf-8")
+            y_test.to_csv(self.train_config.y_test_path, index=False, encoding="utf-8")
 
             tokenizer = DataTokenizer(self.train_config)
             X_train, vectorizer = tokenizer.tokenize(X_train)
@@ -65,6 +70,8 @@ class ModelTrainer:
                 epochs=self.train_config.epochs,
                 validation_split=self.train_config.test_split,
             )
+
+            model.summary(print_fn=lambda x: logger.info(x))
 
             model.save(self.train_config.trained_model_path)
 

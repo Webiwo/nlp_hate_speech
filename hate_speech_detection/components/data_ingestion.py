@@ -16,10 +16,10 @@ class DataIngestion:
     def get_data_from_gcloud(self):
         try:
             logger.info(
-                f"Downloading data from gcloud bucket: {self.config.bucket_name} to {self.config.artifacts_dir} directory"
+                f"Downloading data from gcloud bucket: {self.config.bucket_data_dir} to {self.config.artifacts_dir} directory"
             )
             self.gcloud.sync_folder_from_gcloud(
-                self.config.bucket_name,
+                self.config.bucket_data_dir,
                 self.config.artifacts_dir,
             )
         except Exception as e:

@@ -29,6 +29,4 @@ class ModelArchitecture:
         )
 
         logger.info("Model architecture created successfully.")
-        model.summary(print_fn=lambda x: logger.info(x))
-
         return model
