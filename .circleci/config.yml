@@ -11,21 +11,30 @@ jobs:
           docker_layer_caching: false
 
       - run:
+          name: Install AWS CLI
+          command: |
+            sudo apt-get update && sudo apt-get install -y awscli
+
+      - run:
           name: Build Docker image
           command: |
             docker build -t $ECR_REPO:latest .
+
       - run:
           name: Authenticate with ECR
           command: |
             aws ecr get-login-password --region $AWS_DEFAULT_REGION | \
             docker login --username AWS --password-stdin $ECR_REPO
+
       - run:
           name: Push image to ECR
           command: |
             docker push $ECR_REPO:latest
+
       - add_ssh_keys:
           fingerprints:
             - "SHA256:NTXLhdNhxg+1CMTD8UXGRKPoT6MM8q0oPMMIFCPu2DU"
+            
       - run:
           name: Deploy to EC2
           command: |
