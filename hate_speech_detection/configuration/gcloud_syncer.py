@@ -24,7 +24,7 @@ class GCloudSync:
                 )
             # Construct the gsutil command
             command = [
-                "gcloud.cmd",
+                "gcloud",
                 "storage",
                 "rsync",
                 "--recursive",
@@ -56,7 +56,7 @@ class GCloudSync:
         try:
             # Construct the gsutil command
             command = [
-                "gcloud.cmd",
+                "gcloud",
                 "storage",
                 "rsync",
                 "--recursive",
