@@ -8,6 +8,15 @@ COPY . /app
 
 RUN pip install --no-cache-dir -r /app/requirements.txt
 
+RUN apt-get update && apt-get install -y curl gnupg && \
+    echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | \
+    tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && \
+    curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
+    apt-get update -y && apt-get install -y google-cloud-cli && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/usr/lib/google-cloud-sdk/bin:${PATH}"
+
 EXPOSE 80
 
 CMD ["uvicorn", "app_fast:app", "--host", "0.0.0.0", "--port", "80", "--workers", "1"]
