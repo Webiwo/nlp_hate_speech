@@ -1,50 +1,34 @@
 version: 2.1
-orbs:
-  aws-cli: circleci/aws-cli@5.1
-  aws-ecr: circleci/aws-ecr@9.0
+
 jobs:
-  continuous-integration:
+  build_and_deploy:
     docker:
-      - image: cimg/base:stable
-    resource_class: medium
+      - image: cimg/python:3.11
     steps:
-      - setup_remote_docker:
-          version: 28.5.1
-          docker_layer_caching: true
-
-      - aws-ecr/build-and-push-image:
-          create-repo: true
-          dockerfile: Dockerfile
-          path: .
-          platform: linux/amd64
-          push-image: true
-          region: '${AWS_REGION}'
-          repo: demo
-          registry-id: AWS_ECR_REGISTRY_ID
-          repo-scan-on-push: true
-          tag: latest
-
-  continuous-delivery:
-    machine: true
-    resource_class: webiwo/hatespeech
-    steps:
-      - aws-cli/setup
-
+      - checkout
       - run:
-          name: auth to aws ecr
-          command: aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin 034154586122.dkr.ecr.eu-north-1.amazonaws.com
-
+          name: Build Docker image
+          command: |
+            docker build -t $ECR_REPO:latest .
       - run:
-          name: pull image from private repository
-          command: docker pull 034154586122.dkr.ecr.eu-north-1.amazonaws.com/hatespeech:latest
-
+          name: Authenticate with ECR
+          command: |
+            aws ecr get-login-password --region $AWS_DEFAULT_REGION | \
+            docker login --username AWS --password-stdin $ECR_REPO
       - run:
-          name: run image
-          command: docker run -d -p 8080:8080 034154586122.dkr.ecr.eu-north-1.amazonaws.com/hatespeech:latest
+          name: Push image to ECR
+          command: |
+            docker push $ECR_REPO:latest
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:NTXLhdNhxg+1CMTD8UXGRKPoT6MM8q0oPMMIFCPu2DU"
+      - run:
+          name: Deploy to EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no $EC2_SSH_USER@$EC2_HOST \
+              "./deploy.sh $ECR_REPO:latest"
 workflows:
-  CICD:
+  version: 2
+  build_and_deploy_workflow:
     jobs:
-      - continuous-integration
-      - continuous-delivery:
-          requires:
-          - continuous-integration           
+      - build_and_deploy
