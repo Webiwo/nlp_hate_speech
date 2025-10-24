@@ -16,6 +16,12 @@ jobs:
             sudo apt-get update && sudo apt-get install -y awscli
 
       - run:
+          name: Create GCP credentials file
+          command: |
+            echo "$GCP_CREDENTIALS" > credentials.json
+            echo "GCP credentials file created"      
+
+      - run:
           name: Build Docker image
           command: |
             docker build -t $ECR_REPO:latest .
@@ -34,7 +40,7 @@ jobs:
       - add_ssh_keys:
           fingerprints:
             - "SHA256:NTXLhdNhxg+1CMTD8UXGRKPoT6MM8q0oPMMIFCPu2DU"
-            
+
       - run:
           name: Deploy to EC2
           command: |
