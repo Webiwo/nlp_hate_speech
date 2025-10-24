@@ -4,6 +4,10 @@ RUN apt-get update -y && apt-get install -y build-essential && rm -rf /var/lib/a
 
 WORKDIR /app
 
+ARG GCP_KEY_FILE
+COPY ${GCP_KEY_FILE} /app/credentials.json
+ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
+
 COPY . /app
 
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
