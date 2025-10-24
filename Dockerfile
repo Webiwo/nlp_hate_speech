@@ -1,13 +1,12 @@
 FROM python:3.11-slim-bookworm
 
-RUN apt-get update -y && apt-get install -y build-essential && rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y && \
+    apt-get install -y build-essential curl gnupg apt-transport-https ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-ARG GCP_KEY_FILE
-COPY ${GCP_KEY_FILE} /app/credentials.json
-ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
-
+COPY credentials.json /app/credentials.json
 COPY . /app
 
 ENV GOOGLE_APPLICATION_CREDENTIALS="/app/credentials.json"
