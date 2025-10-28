@@ -1,7 +1,8 @@
 import asyncio
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import StreamingResponse, RedirectResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 
@@ -19,10 +20,12 @@ app_port = web_config.app_port
 
 app = FastAPI()
 
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
-@app.get("/", tags=["authentication"])
+
+@app.get("/", tags=["ui"])
 async def index():
-    return RedirectResponse(url="/docs")
+    return FileResponse("static/predict.html")
 
 
 @app.get("/train", tags=["training"])

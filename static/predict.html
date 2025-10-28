@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hate Speech Detector 🧠</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+  <div class="bg-white shadow-xl rounded-2xl p-8 max-w-lg w-full">
+    <h1 class="text-2xl font-bold text-center mb-2 text-gray-800">
+      🧠 Hate Speech Detector
+    </h1>
+    <h2 class="text-2l text-center mb-6 text-blue-400">
+      <a href="https://github.com/Webiwo/nlp_hate_speech" target="_blank">link to source code on GitHub</a>
+    </h2>
+
+    <textarea
+      id="textInput"
+      class="w-full border rounded-lg p-3 h-32 focus:ring-2 focus:ring-blue-500 outline-none"
+      placeholder="Wpisz tekst do analizy..."
+    ></textarea>
+
+    <button
+      id="analyzeBtn"
+      class="w-full mt-4 py-2 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition"
+    >
+      Sprawdź tekst
+    </button>
+
+    <div id="result" class="mt-6 p-4 text-center rounded-lg font-semibold hidden"></div>
+    <div id="error" class="mt-6 p-4 bg-red-50 text-red-600 text-center rounded-lg hidden"></div>
+  </div>
+
+  <script>
+    document.getElementById("analyzeBtn").addEventListener("click", async () => {
+      const text = document.getElementById("textInput").value.trim();
+      const resultBox = document.getElementById("result");
+      const errorBox = document.getElementById("error");
+
+      resultBox.classList.add("hidden");
+      errorBox.classList.add("hidden");
+
+      if (!text) {
+        errorBox.textContent = "Wpisz tekst do analizy!";
+        errorBox.classList.remove("hidden");
+        return;
+      }
+
+      try {
+        const response = await fetch("/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        resultBox.textContent = data.prediction;
+        resultBox.classList.remove("hidden");
+
+        if (data.prediction.toLowerCase().includes("hate")) {
+          resultBox.className =
+            "mt-6 p-4 text-center rounded-lg font-semibold bg-red-100 text-red-700";
+        } else {
+          resultBox.className =
+            "mt-6 p-4 text-center rounded-lg font-semibold bg-green-100 text-green-700";
+        }
+      } catch (err) {
+        errorBox.textContent = "Nie udało się połączyć z serwerem API.";
+        errorBox.classList.remove("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
